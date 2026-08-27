@@ -1,1 +1,6 @@
+/** @file index.css @description Establishes global typography and base visual rules. @layer Client Styling @interacts Tailwind and rendered components. @futureWork Introduce documented design tokens if needed. @nonGoal Do not add page layouts here. */
 @import "tailwindcss";
+@theme { --font-sans: "Inter", "Avenir Next", "Segoe UI", sans-serif; }
+html { background: #f8fafc; }
+body { margin: 0; min-width: 320px; }
+* { box-sizing: border-box; }

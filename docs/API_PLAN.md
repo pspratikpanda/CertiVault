@@ -32,13 +32,37 @@ This document details the planned REST API endpoints for the CertiVault backend.
 ## 0. Health & System Endpoints
 
 ### `GET /api/health`
-Returns system operational status and connectivity confirmation.
+Returns API process operational status. It does not imply MongoDB is connected.
 - **Auth Required**: No
 - **Response**:
   ```json
   {
     "success": true,
-    "message": "CertiVault API is running"
+    "message": "CertiVault API is running.",
+    "data": {
+      "status": "operational",
+      "timestamp": "2026-08-27T00:00:00.000Z"
+    }
+  }
+  ```
+
+### `GET /api/health/db`
+Returns MongoDB connection state from Mongoose.
+- **Auth Required**: No
+- **Status**: `200` when connected; `503` when the database is unavailable or `MONGO_URI` is not configured.
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "message": "MongoDB is connected.",
+    "data": {
+      "database": {
+        "connected": true,
+        "state": "connected",
+        "configured": true,
+        "database": "certivault"
+      }
+    }
   }
   ```
 
