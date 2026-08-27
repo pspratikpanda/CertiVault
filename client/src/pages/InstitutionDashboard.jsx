@@ -1,13 +1,5 @@
-// CertiVault developer header
-import React from 'react';
-
-const InstitutionDashboard = () => {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh]">
-      <h1 className="text-3xl font-bold mb-4">Institution Dashboard</h1>
-      <p className="text-slate-400">Placeholder for /institution/dashboard</p>
-    </div>
-  );
-};
-
-export default InstitutionDashboard;
+/** @file InstitutionDashboard.jsx @description Static institution overview dashboard. @layer Client Page @interacts Cards, badges and routing. @futureWork Replace metrics with institution data. @nonGoal Do not fetch or mutate credentials. */
+import { Link } from 'react-router-dom';
+import { Badge, Button, Card, EmptyState } from '../components';
+const metrics = [['Credentials issued', '1,284'], ['Active credentials', '1,247'], ['Revoked credentials', '37']];
+export default function InstitutionDashboard() { return <div className="mx-auto max-w-7xl"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-sm font-medium text-slate-500">Institution workspace</p><h1 className="mt-1 text-2xl font-semibold tracking-tight">Overview</h1></div><Link to="/institution/credentials/new"><Button>Issue credential</Button></Link></div><div className="mt-8 grid gap-4 md:grid-cols-3">{metrics.map(([label, value]) => <Card key={label}><p className="text-sm text-slate-500">{label}</p><p className="mt-3 text-3xl font-semibold tracking-tight">{value}</p><p className="mt-2 text-xs text-slate-400">Placeholder metric</p></Card>)}</div><Card className="mt-6" header={<div className="flex items-center justify-between"><div><h2 className="font-semibold">Recent credentials</h2><p className="mt-1 text-sm text-slate-500">Illustrative records only</p></div><Link to="/institution/credentials" className="text-sm font-semibold text-cyan-700 hover:text-cyan-800">View all</Link></div>}><div className="hidden divide-y divide-slate-100 md:block">{['Aarav Mehta — Bachelor of Engineering', 'Lena Thomas — Master of Public Policy', 'Maya Iyer — Doctor of Philosophy'].map((item, index) => <div key={item} className="flex items-center justify-between py-4 text-sm"><span className="font-medium">{item}</span><Badge tone={index === 2 ? 'warning' : 'success'}>{index === 2 ? 'Pending review' : 'Active'}</Badge></div>)}</div><div className="md:hidden"><EmptyState title="Recent credential display" description="Sample records appear on larger screens in this static prototype." /></div></Card></div>; }
