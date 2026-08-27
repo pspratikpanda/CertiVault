@@ -8,6 +8,10 @@ CertiVault provides academic institutions with a secure platform to issue digita
 
 Rather than running a decentralized smart contract network, CertiVault leverages a **simplified single-node tamper-evident hash-chain ledger** persisted in MongoDB and implemented as a simplified single-node tamper-evident hash-chain ledger by the backend. and backed by **digital signatures (asymmetric cryptography)**.
 
+> [!NOTE]
+> **Implementation Status (Step 1 Complete)**: The project base structure is established with a Node.js/Express backend (`/server`) exposing `/api/health` and a React + Vite + Tailwind CSS frontend (`/client`) rendering the landing page and verifying API connectivity.
+
+
 ```mermaid
 graph TD
     subgraph Client [React Frontend Layer]

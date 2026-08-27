@@ -10,11 +10,14 @@ This roadmap documents the planned micro-steps to build the CertiVault system. W
 - Define system architecture, planned API structures, security principles, and single-node hash-chain logic.
 - Establish file structure rules for the upcoming steps.
 
-### [TODO] Step 1: Backend Server Setup
-- Initialize the Express backend.
-- Setup directory layout (controllers, models, routes, services, middleware).
-- Configure MongoDB connection using Mongoose.
-- Establish basic health check endpoint and error-handling middleware.
+### [DONE] Step 1: Initial Full-Stack Project Structure & Health API
+- Initialize full-stack MERN project structure (`client/` and `server/`).
+- Setup backend Express server layout (`config/`, `controllers/`, `middleware/`, `models/`, `routes/`, `services/`, `crypto/`, `utils/`).
+- Setup frontend React + Vite + Tailwind CSS layout (`components/`, `pages/`, `layouts/`, `services/`, `hooks/`, `context/`, `utils/`, `assets/`).
+- Create basic landing page and Axios API client.
+- Implement `GET /api/health` endpoint returning `{ success: true, message: "CertiVault API is running" }`.
+- Create `.gitignore` and `.env.example` files.
+
 
 ### [TODO] Step 2: Cryptographic Services Module
 - Implement server-side hashing helper (SHA-256).

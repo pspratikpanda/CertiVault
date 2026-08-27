@@ -29,6 +29,21 @@ This document details the planned REST API endpoints for the CertiVault backend.
 
 ---
 
+## 0. Health & System Endpoints
+
+### `GET /api/health`
+Returns system operational status and connectivity confirmation.
+- **Auth Required**: No
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "message": "CertiVault API is running"
+  }
+  ```
+
+---
+
 ## 1. Authentication Endpoints
 
 ### `POST /api/auth/register`
