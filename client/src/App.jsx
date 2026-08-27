@@ -1,31 +1,23 @@
-// CertiVault developer header
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import AppLayout from './layouts/AppLayout'
-import LandingPage from './pages/LandingPage'
-import InstitutionLogin from './pages/InstitutionLogin'
-import InstitutionRegister from './pages/InstitutionRegister'
-import InstitutionDashboard from './pages/InstitutionDashboard'
-import VerifyCredential from './pages/VerifyCredential'
-import LedgerView from './pages/LedgerView'
-import TamperDemo from './pages/TamperDemo'
+/**
+ * @file App.jsx
+ * @description Root application component setting up React Router routes and layout wrappers.
+ * @layer Client Core
+ * @interacts MainLayout, LandingPage, React Router
+ * @futureWork Add Dashboard, Verification Portal, and Tamper Demo routes in future steps.
+ * @nonGoal Do not place global context state providers or complex business logic inside App.jsx directly.
+ */
 
-function App() {
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import MainLayout from './layouts/MainLayout';
+import LandingPage from './pages/LandingPage';
+
+export default function App() {
   return (
-    <Router>
-      <AppLayout>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/institution/login" element={<InstitutionLogin />} />
-          <Route path="/institution/register" element={<InstitutionRegister />} />
-          <Route path="/institution/dashboard" element={<InstitutionDashboard />} />
-          <Route path="/verify/:id" element={<VerifyCredential />} />
-          <Route path="/ledger" element={<LedgerView />} />
-          <Route path="/tamper-demo" element={<TamperDemo />} />
-        </Routes>
-      </AppLayout>
-    </Router>
-  )
+    <Routes>
+      <Route path="/" element={<MainLayout />}>
+        <Route index element={<LandingPage />} />
+      </Route>
+    </Routes>
+  );
 }
-
-export default App
