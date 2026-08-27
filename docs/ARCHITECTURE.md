@@ -9,7 +9,7 @@ CertiVault provides academic institutions with a secure platform to issue digita
 Rather than running a decentralized smart contract network, CertiVault leverages a **simplified single-node tamper-evident hash-chain ledger** persisted in MongoDB and implemented as a simplified single-node tamper-evident hash-chain ledger by the backend. and backed by **digital signatures (asymmetric cryptography)**.
 
 > [!NOTE]
-> **Implementation Status (Step 1 Complete)**: The project base structure is established with a Node.js/Express backend (`/server`) exposing `/api/health` and a React + Vite + Tailwind CSS frontend (`/client`) rendering the landing page and verifying API connectivity.
+> **Implementation Status (Step 3 Complete)**: The Express backend has a MongoDB/Mongoose connection layer and health endpoints. It does not yet implement authentication, institutions, credentials, cryptography, ledger operations, QR verification, or revocation.
 
 
 ```mermaid
@@ -52,12 +52,31 @@ graph TD
 - **Axios**: HTTP client configuration with JWT attachment interceptors.
 
 ### 2.2. Server (Node.js & Express)
-- **Express.js API**: Exposes endpoints for authentication, issuance, verification, and revocation.
-- **Middleware**: JWT authentication verification, API input validation.
-- **Cryptographic Service**: A self-contained server-side module executing digital signatures and block hashing using Node.js built-in `crypto` module.
-- **Ledger Service**: Handles reading/appending blocks and verifying the integrity of the hash chain.
+- **Express.js API**: Currently exposes unauthenticated system and database health endpoints. Feature endpoints are planned, not implemented.
+- **Configuration**: `config/env.js` loads `PORT`, `MONGO_URI`, `JWT_SECRET`, and `FRONTEND_URL` from runtime environment variables. Only `.env.example` is stored in the repository.
+- **Database**: `config/database.js` owns the Mongoose connection lifecycle. The server tries to connect before accepting HTTP traffic when `MONGO_URI` is configured.
+- **Middleware**: JSON/CORS setup, a JSON API 404 handler, and centralized error handling.
+- **Response Convention**: Successful responses use `{ success: true, message?, data? }`; errors use `{ success: false, error: { code, message, details? } }`.
 
-### 2.3. Storage (MongoDB)
+### 2.3. Backend Request Flow
+
+The backend follows a one-way request flow. Routes only declare HTTP mappings; controllers translate requests into API responses; services contain reusable application logic; models are reserved for Mongoose persistence rules. Configuration and middleware sit outside this feature flow.
+
+```mermaid
+flowchart LR
+    Client --> Route[Route]
+    Route --> Controller
+    Controller --> Service
+    Service --> Model[Mongoose Model]
+    Model --> MongoDB
+    Controller --> Response[Standard API response]
+    Route -. rejected async work .-> Error[Central error middleware]
+    Error --> Response
+```
+
+For the implemented health endpoints, `health.routes.js` calls `health.controller.js`, which retrieves connection state through `health.service.js` and `config/database.js`. No model is required because the endpoint reads Mongoose's connection state rather than application data.
+
+### 2.4. Storage (MongoDB)
 
 #### Institution Collection
 Stores institutional details, hashed credentials (bcrypt for login), public verification keys, and private keys (encrypted at rest using an application-level key).

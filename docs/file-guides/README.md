@@ -41,10 +41,10 @@ CertiVault/
 │   ├── SECURITY.md
 │   ├── HASH_CHAIN.md
 │   └── file-guides/          # Documentation for non-commentable files
-├── client/                   # Vite + React Client SPA (Step 8+)
+├── client/                   # Vite + React Client SPA (PS-03 frontend / Step 8+)
 │   ├── src/
-│   │   ├── components/       # Reusable UI widgets
-│   │   ├── pages/            # Page-level route views (Dashboard, Portal, etc.)
+│   │   ├── components/       # Reusable UI widgets (Navbar, Sidebar, Button, Input, Card, Badge, Modal and states)
+│   │   ├── pages/            # Page-level route views for /, /login, /institution and /verify workflows
 │   │   ├── services/         # Axios API connection layers
 │   │   └── App.jsx
 │   ├── index.html
@@ -52,13 +52,25 @@ CertiVault/
 │   └── package.json
 └── server/                   # Node + Express Server API (Step 1+)
     ├── src/
-    │   ├── config/           # DB and server configs
+    │   ├── config/           # Environment and MongoDB connection lifecycle
     │   ├── controllers/      # Request handlers
-    │   ├── middleware/       # Auth validation, error handler
-    │   ├── models/           # Mongoose schemas
+    │   ├── middleware/       # Future auth validation and current API error handler
+    │   ├── models/           # Mongoose schemas (empty until a domain model is needed)
     │   ├── routes/           # REST endpoints mapping
-    │   ├── services/         # Cryptography & Ledger functions
+    │   ├── services/         # Reusable application services (health first; crypto/ledger later)
+    │   ├── utils/            # Async-controller and JSON response utilities
     │   └── app.js
     ├── .env.example
     └── package.json
 ```
+
+## 3. Backend Environment Files
+
+`server/.env.example` documents the supported runtime variables. It may contain safe local examples but never real secrets or hosted MongoDB connection strings.
+
+- `PORT`: HTTP listener port.
+- `MONGO_URI`: MongoDB connection string. Required for a connected database health result.
+- `JWT_SECRET`: reserved for the future authentication step; never expose it to the client.
+- `FRONTEND_URL`: browser origin allowed by backend CORS.
+
+The server's request boundary is `routes → controllers → services → models`. Routes must remain declarative; controllers must not contain persistence internals; services must not send HTTP responses; models must not contain route logic.

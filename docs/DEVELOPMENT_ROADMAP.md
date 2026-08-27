@@ -18,6 +18,13 @@ This roadmap documents the planned micro-steps to build the CertiVault system. W
 - Implement `GET /api/health` endpoint returning `{ success: true, message: "CertiVault API is running" }`.
 - Create `.gitignore` and `.env.example` files.
 
+### [DONE] Step 3: Backend Foundation & MongoDB Connectivity
+- Add centralized environment configuration for `PORT`, `MONGO_URI`, `JWT_SECRET`, and `FRONTEND_URL`.
+- Add Mongoose connection lifecycle configuration and database health reporting.
+- Standardize successful and failed API responses, asynchronous controller handling, centralized errors, and API 404 responses.
+- Establish the routes → controllers → services → models request-flow boundary.
+- Add `GET /api/health` and `GET /api/health/db`; do not add feature-domain models or endpoints.
+
 
 ### [TODO] Step 2: Cryptographic Services Module
 - Implement server-side hashing helper (SHA-256).
@@ -55,7 +62,14 @@ This roadmap documents the planned micro-steps to build the CertiVault system. W
 - The endpoint will fetch the credential, fetch the matching block, verify the credential hash, verify the digital signature using the institution's public key, verify the block hash/linkage, and return status metadata.
 - Return detailed verification status: `VERIFIED` (ACTIVE), `REVOKED`, or `TAMPERED/INVALID`.
 
-### [TODO] Step 8: Frontend Core Setup
+### [DONE] Step 2: PS-03 Frontend Workflow
+- Create a static, professional client experience for the PS-03 institution and public-verification workflows.
+- Add routes for landing, login, institution dashboard, credentials list, issue credential, public verification, and verification result.
+- Establish reusable Navbar, Sidebar, Button, Input, Card, Badge, Modal, LoadingState, ErrorState, and EmptyState components.
+- Keep every screen presentation-only: no backend integration, authentication, credential persistence, QR, or cryptography.
+- Manually verify each route after the client dependencies are installed.
+
+### [DONE] Step 8: Frontend Core Setup
 - Initialize React project using Vite.
 - Install Tailwind CSS, React Router, and Axios.
 - Configure theme properties (vibrant dark mode, premium glassmorphism layouts).
