@@ -1,10 +1,10 @@
 /**
  * @file App.jsx
- * @description Defines the static PS-03 client routes.
+ * @description Defines public and authenticated client routes.
  * @layer Client Routing
  * @interacts Page components and AppLayout.
- * @futureWork Add protected routes and API-backed route states.
- * @nonGoal Do not add authentication or backend calls here.
+ * @futureWork Add feature routes only after their backend endpoints exist.
+ * @nonGoal Do not implement credential data flows here.
  */
 import { Routes, Route } from 'react-router-dom';
 import AppLayout from './layouts/AppLayout';
@@ -15,14 +15,15 @@ import CredentialList from './pages/CredentialList';
 import IssueCredential from './pages/IssueCredential';
 import PublicVerification from './pages/PublicVerification';
 import VerificationResult from './pages/VerificationResult';
+import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
   return <AppLayout><Routes>
     <Route path="/" element={<LandingPage />} />
     <Route path="/login" element={<LoginPage />} />
-    <Route path="/institution" element={<InstitutionDashboard />} />
-    <Route path="/institution/credentials" element={<CredentialList />} />
-    <Route path="/institution/credentials/new" element={<IssueCredential />} />
+    <Route path="/institution" element={<ProtectedRoute><InstitutionDashboard /></ProtectedRoute>} />
+    <Route path="/institution/credentials" element={<ProtectedRoute><CredentialList /></ProtectedRoute>} />
+    <Route path="/institution/credentials/new" element={<ProtectedRoute><IssueCredential /></ProtectedRoute>} />
     <Route path="/verify" element={<PublicVerification />} />
     <Route path="/verify/:credentialId" element={<VerificationResult />} />
   </Routes></AppLayout>;

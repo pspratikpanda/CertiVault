@@ -9,7 +9,7 @@ CertiVault provides academic institutions with a secure platform to issue digita
 Rather than running a decentralized smart contract network, CertiVault leverages a **simplified single-node tamper-evident hash-chain ledger** persisted in MongoDB and implemented as a simplified single-node tamper-evident hash-chain ledger by the backend. and backed by **digital signatures (asymmetric cryptography)**.
 
 > [!NOTE]
-> **Implementation Status (Step 3 Complete)**: The Express backend has a MongoDB/Mongoose connection layer and health endpoints. It does not yet implement authentication, institutions, credentials, cryptography, ledger operations, QR verification, or revocation.
+> **Implementation Status (Step 4 Complete)**: The backend supports institution and administrator account sessions. Credential issuance, cryptography, ledger operations, QR verification, and revocation are not implemented.
 
 
 ```mermaid
@@ -49,16 +49,25 @@ graph TD
 - **Vite & React**: Single Page Application (SPA) offering high performance and responsive interfaces.
 - **Tailwind CSS**: Tailored dashboard, verification views, and interactive tamper-demo screens.
 - **React Router**: Routing between the Institution Dashboard, Signup/Login, and Public verification pages.
-- **Axios**: HTTP client configuration with JWT attachment interceptors.
+- **Axios**: HTTP client configured to send the HttpOnly session cookie with API requests; the client never stores a JWT in browser storage.
 
 ### 2.2. Server (Node.js & Express)
-- **Express.js API**: Currently exposes unauthenticated system and database health endpoints. Feature endpoints are planned, not implemented.
+- **Express.js API**: Exposes system health and institution/admin session endpoints. Credential-domain endpoints are planned, not implemented.
 - **Configuration**: `config/env.js` loads `PORT`, `MONGO_URI`, `JWT_SECRET`, and `FRONTEND_URL` from runtime environment variables. Only `.env.example` is stored in the repository.
 - **Database**: `config/database.js` owns the Mongoose connection lifecycle. The server tries to connect before accepting HTTP traffic when `MONGO_URI` is configured.
-- **Middleware**: JSON/CORS setup, a JSON API 404 handler, and centralized error handling.
+- **Middleware**: JSON/CORS setup, cookie parsing, JWT authentication, role-based authorization, a JSON API 404 handler, and centralized error handling.
 - **Response Convention**: Successful responses use `{ success: true, message?, data? }`; errors use `{ success: false, error: { code, message, details? } }`.
 
-### 2.3. Backend Request Flow
+### 2.3. Authentication Boundary
+
+- Accounts have one of two roles: `INSTITUTION` or `ADMIN`.
+- Public credential verification remains account-free.
+- `POST /api/auth/register` creates only `INSTITUTION` accounts. It rejects attempts to self-assign `ADMIN`; administrator provisioning is intentionally not exposed as a public endpoint.
+- Passwords are bcrypt-hashed with work factor 12 and the `password` field is excluded from normal model queries and API responses.
+- A successful login signs a JWT using the environment-supplied `JWT_SECRET` and returns it only as the `certivault_session` HttpOnly cookie. The frontend restores identity by calling `GET /api/auth/me`.
+- API authorization is authoritative. The frontend redirect is a usability guard, not a security boundary.
+
+### 2.4. Backend Request Flow
 
 The backend follows a one-way request flow. Routes only declare HTTP mappings; controllers translate requests into API responses; services contain reusable application logic; models are reserved for Mongoose persistence rules. Configuration and middleware sit outside this feature flow.
 
@@ -76,7 +85,7 @@ flowchart LR
 
 For the implemented health endpoints, `health.routes.js` calls `health.controller.js`, which retrieves connection state through `health.service.js` and `config/database.js`. No model is required because the endpoint reads Mongoose's connection state rather than application data.
 
-### 2.4. Storage (MongoDB)
+### 2.5. Storage (MongoDB)
 
 #### Institution Collection
 Stores institutional details, hashed credentials (bcrypt for login), public verification keys, and private keys (encrypted at rest using an application-level key).

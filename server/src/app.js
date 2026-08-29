@@ -9,6 +9,7 @@
 
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { config } from './config/env.js';
 import apiRoutes from './routes/api.routes.js';
 import { notFoundHandler, errorHandler } from './middleware/error.middleware.js';
@@ -19,12 +20,13 @@ const app = express();
 app.use(cors({ origin: config.frontendUrl, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // API Routes
 app.use('/api', apiRoutes);
 
 // Error Handling Middleware
-app.use('/api', notFoundHandler);
+app.use(notFoundHandler);
 app.use(errorHandler);
 
 export default app;
