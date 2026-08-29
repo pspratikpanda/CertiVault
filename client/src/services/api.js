@@ -1,10 +1,10 @@
 /**
  * @file api.js
- * @description Centralized Axios HTTP client instance for CertiVault backend API communication with automatic port fallback.
+ * @description Centralized Axios client using HttpOnly-cookie sessions for CertiVault API communication.
  * @layer Client Service
  * @interacts Server REST API (/api), React Components & Hooks
- * @futureWork Add JWT token request interceptors in Step 3.
- * @nonGoal Do not contain UI state or component rendering logic here.
+ * @futureWork Add safe request correlation when observability is introduced.
+ * @nonGoal Do not store or manually attach JWTs from browser storage.
  */
 
 import axios from 'axios';
@@ -16,6 +16,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
   timeout: 5000,
 });
 
@@ -34,7 +35,7 @@ export const checkHealth = async () => {
           const fallbackRes = await axios.get(`http://localhost:${port}/api/health`, { timeout: 3000 });
           api.defaults.baseURL = `http://localhost:${port}/api`;
           return fallbackRes.data;
-        } catch (ignored) {
+        } catch {
           // continue checking next port
         }
       }

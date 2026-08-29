@@ -33,10 +33,11 @@ This roadmap documents the planned micro-steps to build the CertiVault system. W
 - Implement symmetric encryption/decryption utilities for securing private keys at rest using an environment variable.
 - Add test scripts in `scratch/` to verify correctness.
 
-### [TODO] Step 3: Institution Authentication
-- Define Institution DB schema (name, email, password hash, public verification key, and private key encrypted at rest).
-- Create Signup and Login routes with bcrypt password hashing.
-- Build JWT generation and verification middleware.
+### [DONE] Step 4: Institution & Administrator Authentication
+- Define a User schema with `INSTITUTION` and `ADMIN` roles, bcrypt password hashes, and password-hidden queries.
+- Add register, login, current-user, and logout session endpoints using HttpOnly JWT cookies.
+- Add JWT authentication middleware, role authorization middleware, a protected institution frontend route, and frontend session restoration.
+- Do not add credential creation, cryptography, QR, or revocation workflows.
 
 ### [TODO] Step 4: Ledger Schema & Chain Logic
 - Define the `LedgerBlock` schema (index, timestamp, credentialId, dataHash, previousHash, signature, blockHash).

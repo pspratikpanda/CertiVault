@@ -70,7 +70,9 @@ CertiVault/
 
 - `PORT`: HTTP listener port.
 - `MONGO_URI`: MongoDB connection string. Required for a connected database health result.
-- `JWT_SECRET`: reserved for the future authentication step; never expose it to the client.
+- `JWT_SECRET`: required to sign authentication sessions; never expose it to the client.
 - `FRONTEND_URL`: browser origin allowed by backend CORS.
 
 The server's request boundary is `routes → controllers → services → models`. Routes must remain declarative; controllers must not contain persistence internals; services must not send HTTP responses; models must not contain route logic.
+
+Authentication extends this boundary with `auth.middleware.js`: the middleware verifies an HttpOnly-cookie JWT before protected controllers execute. It may attach the current user to `req.user`, but roles and password hashing remain model/service concerns.

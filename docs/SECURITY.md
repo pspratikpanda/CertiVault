@@ -38,10 +38,13 @@ Hash-chain ledgers are immutable, which presents privacy challenges (e.g., "Righ
 
 ## 3. Web & API Security
 
-- **Password Hashing**: User/Institution passwords must be hashed using `bcrypt` (with a work factor of 10 or higher) before storage. Never store plaintext passwords.
-- **Authentication**: JWT tokens are signed using a robust backend secret (`JWT_SECRET`) stored in the `.env` file. Session durations must be capped (e.g., 24 hours).
+- **Password Hashing**: User/Institution passwords are hashed using `bcrypt` with work factor 12 before storage. The User model excludes the password hash from normal queries and API responses. Passwords are never logged.
+- **Authentication**: JWT tokens are signed only with `JWT_SECRET` from local environment configuration. The token lifetime is 12 hours and no secret is hardcoded.
+- **Session Storage**: The JWT is returned only as the `certivault_session` HttpOnly cookie (`SameSite=Lax`; `Secure` in production). The frontend stores only non-sensitive user display state in memory and retrieves the authenticated user from `GET /api/auth/me`; it does not use `localStorage` or `sessionStorage` for tokens.
+- **Logout**: `POST /api/auth/logout` clears the session cookie using matching cookie attributes.
 - **Input Validation**: All Express routes must validate request payloads. Sanitize input to block NoSQL injection (e.g., MongoDB query selector injections) and Cross-Site Scripting (XSS).
-- **Authorization**: Endpoints for credential issuance and revocation must verify that the requesting institution's ID (derived from the JWT) matches the issuer fields.
+- **Authorization**: `requireAuth` verifies the signed JWT and checks that the referenced account still exists. `authorizeRoles` enforces role-based access. `INSTITUTION` accounts cannot self-register as `ADMIN`; no public administrator-provisioning endpoint exists.
+- **Public Access**: Public verification endpoints must remain unauthenticated. They must not reveal private account data.
 
 ---
 
