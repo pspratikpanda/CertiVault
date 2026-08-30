@@ -20,12 +20,22 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+// FRONTEND_URL supports comma-separated origins for multi-domain CORS
+const parseFrontendUrls = (raw) => {
+  if (!raw) return ['http://localhost:5173'];
+  return raw.split(',').map((u) => u.trim()).filter(Boolean);
+};
+
 export const config = {
   port: Number(process.env.PORT) || 5000,
   nodeEnv: process.env.NODE_ENV || 'development',
+  isProduction,
   mongoUri: process.env.MONGO_URI || '',
   jwtSecret: process.env.JWT_SECRET || '',
   dbEncryptionKey: process.env.DB_ENCRYPTION_KEY || '',
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+  frontendUrls: parseFrontendUrls(process.env.FRONTEND_URL),
+  frontendUrl: parseFrontendUrls(process.env.FRONTEND_URL)[0],
   jwtExpiresIn: '12h',
 };
