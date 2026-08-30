@@ -1,0 +1,100 @@
+# CertiVault: Project Status & Detailed Development Plan
+
+## 1. Project Overview
+We are building "CertiVault", a blockchain-backed system to solve the issue of fake degrees and manual verification delays for academic credentials. Educational institutions use the portal to issue digitally signed, tamper-proof credentials. Employers and third-party verifiers can instantly validate credential authenticity via QR code or ID/hash lookup without contacting the issuing institution directly. 
+
+To fit within an internal hackathon timeline, the project bypasses a decentralized blockchain network in favor of a single-node, tamper-evident hash-chain ledger persisted in MongoDB. Any unauthorized modification to a credential record or a ledger block breaks the chain of block hashes, which is instantly detected upon verification.
+
+---
+
+## 2. Completed Milestones
+
+### A. Project Structure & Health API (Steps 0, 1, 3)
+- **MERN Stack Structure**: Setup of independent `client/` (React, Vite, Tailwind CSS) and `server/` (Node.js, Express) directories.
+- **Express Server layout**: Folders created for `config/`, `controllers/`, `middleware/`, `models/`, `routes/`, `services/`, `crypto/`, and `utils/`.
+- **Database Connectivity**: MongoDB connection configuration using Mongoose lifecycle hooks with DB health endpoints (`GET /api/health` and `GET /api/health/db`).
+- **Standardized API Responses**: Centralized error middleware, asynchronous route handler wrappers, and uniform API JSON responses implemented.
+
+### B. Authentication System (Step 4)
+- **Institution Model**: Created `User` schema supporting `INSTITUTION` and `ADMIN` roles, password hashing via `bcrypt` (12 rounds), and automated exclusion of hashes from database responses.
+- **Endpoints**: Secure registration, login, logout, and token validation (session restoration via `GET /api/auth/me`) using HttpOnly JWT cookies.
+- **Route Guards**: Middleware for JWT authentication verification and role-based route authorization.
+
+### C. Static Frontend Skeleton (PS-03 Frontend Workflow, Step 8)
+- **UI & Layouts**: Configured Vite + Tailwind CSS with a vibrant dark-mode theme, glassmorphic card layouts, and sidebar navigation.
+- **Reusable Components**: Created standard components including `Button`, `Modal`, `Navbar`, `Sidebar`, `Card`, `Badge`, `Input`, `LoadingState`, `ErrorState`, and `EmptyState`.
+- **Static Pages**: Created routes and visual flows for `/`, `/login`, `/institution`, `/institution/credentials`, `/institution/credentials/new`, `/verify`, and `/verify/:credentialId` as presentation-only dashboards without live API connections.
+
+### D. Cryptographic Services Module (Step 1)
+- **Hashing**: SHA-256 with key-sorted deterministic JSON serialization (`hashing.service.js`).
+- **Key Generation**: Institutional RSA-2048 keypair generation (`keypair.service.js`).
+- **Symmetric Encryption**: Private key encryption at rest (`encryption.service.js`) using AES-256-GCM and `DB_ENCRYPTION_KEY`.
+- **Signing & Verification**: RSA signatures (`signing.service.js`) calculated as `Sign(privateKey, dataHash)` and validated via `Verify(publicKey, dataHash, signature)`.
+- **User Integration**: Updated `registerInstitution` in `auth.service.js` to automatically create, encrypt, and store keys during signup, exposing only the public key.
+
+### E. Ledger Schema & Chain Logic (Step 2)
+- **Database Schema**: `LedgerBlock` model established with validation parameters (`index`, `timestamp`, `credentialId`, `dataHash`, `previousHash`, `signature`, `blockHash`).
+- **Chain Services**: Utility routines (`ledger.service.js`) for fetching tail blocks, computing standard block hashes (`index + timestamp + credentialId + dataHash + previousHash + signature`), and verifying full chain integrity (detecting broken indices, invalid blocks, or altered hashes).
+
+### F. Credential Model & Issuance APIs (Step 3)
+- **Credential Schema**: `Credential` model (`credential.model.js`) separating immutable student/issuance metadata (hashed), verification data (signatures/hashes), and mutable status fields.
+- **Issuance API**: Created secure `POST /api/credentials/issue` which parses payload fields, dynamically retrieves and decrypts the institution's private key, signs the data hash, appends a new block to the ledger, and saves the credential record.
+- **Listing API**: Created `GET /api/credentials` to list all credentials issued by the authenticated institution.
+
+### G. Credential Revocation Logic (Step 4)
+- **Revocation API**: Created `POST /api/credentials/revoke/:id` which updates the mutable status metadata in MongoDB (marking as `REVOKED` with reason/timestamp).
+- **Security guards**: Validates that only the institution that originally issued the credential can revoke it, returning `403 UNAUTHORIZED_REVOCATION` for others. Confirmed that the ledger block remains untouched.
+
+---
+
+## 3. Step-by-Step Development Plan
+
+The remaining execution steps are mapped out sequentially to build, connect, and verify the backend cryptographic services, hash-chain ledger, database models, verification endpoints, and integrated user interface.
+
+### [DONE] Step 1: Cryptographic Services Module (`server/src/crypto/`)
+- **hashing.service.js**: Helper using Node's `crypto` module to calculate deterministic SHA-256 hashes of canonicalized JSON data. (COMPLETED)
+- **keypair.service.js**: RSA-2048 keypair generation logic for registering institutions. (COMPLETED)
+- **encryption.service.js**: Symmetric encryption/decryption (AES-256-GCM) to secure institutional private keys at rest using an environment-provided key (`DB_ENCRYPTION_KEY`). (COMPLETED)
+- **signing.service.js**: Digital signature creation (`Sign(privateKey, dataHash)`) and validation (`Verify(publicKey, dataHash, signature)`) services. (COMPLETED)
+- **Verification Script**: Added test script in `server/tests/crypto.test.js` to verify key generation, encryption, signing, and verification. (COMPLETED)
+
+### [DONE] Step 2: Ledger Schema & Chain Logic
+- **ledgerBlock.model.js**: Mongoose schema for `LedgerBlock` storing `index` (0 for Genesis), `timestamp`, `credentialId`, `dataHash`, `previousHash`, `signature`, and `blockHash`. (COMPLETED)
+- **ledger.service.js**:
+  - Retrieve the tail block of the chain. (COMPLETED)
+  - Block hash generation using `blockHash = SHA256(index + timestamp + credentialId + dataHash + previousHash + signature)`. (COMPLETED)
+  - Integrity validation logic to verify block hashes and linkage. (COMPLETED - verified via `tests/ledger.test.js`)
+
+### [DONE] Step 3: Credential Model & Issuance APIs
+- **credential.model.js**: Mongoose schema separating immutable data (`studentName`, `studentId`, `degree`, `department`, `graduationDate`, `issueDate`, `institutionId`), verification data (`credentialHash`, `signature`, `keyId`), and mutable status (`status` [ACTIVE|REVOKED], `revokedAt`, `revokedBy`, `revocationReason`). (COMPLETED)
+- **credential.controller.js**: Secure `POST /api/credentials/issue` which validates requests, decrypts institutional keys, signs immutable hashes, writes LedgerBlocks, and saves credential records. (COMPLETED - verified via `tests/credential.integration.test.js`)
+
+### [DONE] Step 4: Credential Revocation Logic
+- **Revocation API**: Secure `POST /api/credentials/revoke/:id` which updates the mutable status metadata in the credential document to `REVOKED`, along with reason and timestamp. (COMPLETED)
+- **Security Check**: Enforces that only the issuing institution has authorization to revoke, leaving the ledger block hash completely untouched. (COMPLETED - verified via `tests/credential.integration.test.js`)
+
+### [DONE] Step 5: Public Verification APIs
+- **Verification Endpoint**: Implement `GET /api/credentials/verify/:id` (no auth required) executing the 4-step validation:
+  1. Recalculate immutable data hash and assert it matches stored `credentialHash` and ledger `dataHash`.
+  2. Retrieve institution public key and verify the cryptographic signature.
+  3. Recompute block hash and confirm chain continuity matching the preceding block.
+  4. Read active/revoked status.
+- **Response**: Return detailed state (e.g., `VERIFIED`, `REVOKED`, or `TAMPERED/INVALID` with specific failure details).
+
+### [DONE] Step 6: Frontend Integration: Institution Portal
+- **Session Bridge**: Connect LoginPage and SignUp flows to actual `/api/auth` endpoints. Persist user session dynamically on mount using `/api/auth/me`.
+- **Dashboard Hooks**: Integrate the credential listing page with `GET /api/credentials` and the issuance modal with `POST /api/credentials/issue`. Implement the revocation trigger action to hit the revocation endpoint.
+
+### [DONE] Step 7: Frontend Integration: Public Portal & QR Code Setup
+- **Search Portal**: Enable search querying by credential ID or hash. (COMPLETED)
+- **QR Code integration**: Add a library on the client to generate QR codes containing the verification URL for issued credentials. Integrate a QR scanner module (e.g., `html5-qrcode`) on the `/verify` page to let users scan codes directly using their device camera. (COMPLETED)
+- **Result States**: Update the verification result UI to render distinct statuses based on the verification response (Green for verified/authentic, yellow for revoked, red animations for security alerts/tampered chain). (COMPLETED)
+
+### [DONE] Step 8: Interactive Tamper Demonstration Screen
+- **Admin DB Playground**: Build a dashboard page where users can inspect raw MongoDB collections for Credentials and Ledger blocks. (COMPLETED)
+- **Simulation Actions**: Add a "Tamper with Data" trigger button that directly modifies a record in MongoDB (e.g., changes a student's name or degree title directly in the database, bypassing application logic). (COMPLETED)
+- **Verification Failure**: Demonstrate in real-time how immediate re-verification of the modified credential triggers `TAMPERED/INVALID` because the recalculated hash mismatches the stored hash and signature verification fails. (COMPLETED)
+
+### [DONE] Step 9: Testing, Optimization & Final Handover
+- **End-to-End Testing**: Validate edge cases (invalid logins, unauthorized revocation attempts, malformed lookup IDs, database downtime). (COMPLETED)
+- **Clean up & Polish**: Review styling consistency, ensure no debug console logs or plain credentials are leaked, test mobile layouts, and complete final walkthrough documentation. (COMPLETED)

@@ -12,6 +12,9 @@ import User, { USER_ROLES } from '../models/user.model.js';
 import { config } from '../config/env.js';
 import { apiError } from '../utils/api-error.js';
 
+import { generateKeyPair } from '../crypto/keypair.service.js';
+import { encrypt } from '../crypto/encryption.service.js';
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_MIN_LENGTH = 12;
 
@@ -26,6 +29,7 @@ export const toPublicUser = (user) => ({
   institutionName: user.institutionName,
   email: user.email,
   role: user.role,
+  publicKey: user.publicKey,
   createdAt: user.createdAt,
 });
 
@@ -40,8 +44,18 @@ export const registerInstitution = async ({ institutionName, email, password, ro
   if (existing) throw apiError(409, 'ACCOUNT_ALREADY_EXISTS', 'An account with this email already exists.');
 
   const passwordHash = await bcrypt.hash(password, 12);
+  const { publicKey, privateKey } = await generateKeyPair();
+  const encryptedPrivateKey = encrypt(privateKey);
+
   try {
-    const user = await User.create({ institutionName: String(institutionName).trim(), email: normalizedEmail, password: passwordHash, role: USER_ROLES.INSTITUTION });
+    const user = await User.create({
+      institutionName: String(institutionName).trim(),
+      email: normalizedEmail,
+      password: passwordHash,
+      role: USER_ROLES.INSTITUTION,
+      publicKey,
+      privateKey: encryptedPrivateKey,
+    });
     return toPublicUser(user);
   } catch (error) {
     if (error?.code === 11000) throw apiError(409, 'ACCOUNT_ALREADY_EXISTS', 'An account with this email already exists.');
