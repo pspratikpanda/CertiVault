@@ -24,7 +24,7 @@ export const notFoundHandler = (req, res) => sendError(res, {
  */
 export const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || (res.statusCode >= 400 ? res.statusCode : 500);
-  if (config.nodeEnv !== 'test') console.error('[CertiVault] API error:', err);
+  if (!config.isProduction) console.error('[CertiVault] API error:', err);
   return sendError(res, {
     statusCode,
     code: err.code || 'INTERNAL_SERVER_ERROR',

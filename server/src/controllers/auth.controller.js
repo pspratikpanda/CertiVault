@@ -12,8 +12,8 @@ import { sendSuccess } from '../utils/api-response.js';
 
 const sessionCookieOptions = (clear = false) => ({
   httpOnly: true,
-  secure: config.nodeEnv === 'production',
-  sameSite: 'lax',
+  secure: config.isProduction,
+  sameSite: config.isProduction ? 'none' : 'lax',
   path: '/',
   ...(!clear && { maxAge: 12 * 60 * 60 * 1000 }),
 });
