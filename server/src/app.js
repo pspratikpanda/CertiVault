@@ -10,14 +10,10 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import path from 'path';
-import { fileURLToPath } from 'url';
+
 import { config } from './config/env.js';
 import apiRoutes from './routes/api.routes.js';
 import { notFoundHandler, errorHandler } from './middleware/error.middleware.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -40,18 +36,8 @@ app.use(cookieParser());
 // API Routes
 app.use('/api', apiRoutes);
 
-// Production: Serve the built React client as static files
-if (config.isProduction) {
-  const clientDistPath = path.resolve(__dirname, '../../client/dist');
-  app.use(express.static(clientDistPath));
-  // SPA fallback: serve index.html for any non-API route
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientDistPath, 'index.html'));
-  });
-} else {
-  // Development: 404 handler for non-API routes
-  app.use(notFoundHandler);
-}
+// 404 handler for non-API routes
+app.use(notFoundHandler);
 
 // Error Handling Middleware
 app.use(errorHandler);
