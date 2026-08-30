@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const requiredInProduction = ['MONGO_URI', 'JWT_SECRET'];
+const requiredInProduction = ['MONGO_URI', 'JWT_SECRET', 'DB_ENCRYPTION_KEY'];
 
 if (process.env.NODE_ENV === 'production') {
   const missing = requiredInProduction.filter((key) => !process.env[key]);
@@ -25,6 +25,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   mongoUri: process.env.MONGO_URI || '',
   jwtSecret: process.env.JWT_SECRET || '',
+  dbEncryptionKey: process.env.DB_ENCRYPTION_KEY || '',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   jwtExpiresIn: '12h',
 };

@@ -15,6 +15,7 @@ import CredentialList from './pages/CredentialList';
 import IssueCredential from './pages/IssueCredential';
 import PublicVerification from './pages/PublicVerification';
 import VerificationResult from './pages/VerificationResult';
+import AdminPlayground from './pages/AdminPlayground';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
     <Route path="/institution" element={<ProtectedRoute><InstitutionDashboard /></ProtectedRoute>} />
     <Route path="/institution/credentials" element={<ProtectedRoute><CredentialList /></ProtectedRoute>} />
     <Route path="/institution/credentials/new" element={<ProtectedRoute><IssueCredential /></ProtectedRoute>} />
+    <Route path="/institution/playground" element={<ProtectedRoute><AdminPlayground /></ProtectedRoute>} />
     <Route path="/verify" element={<PublicVerification />} />
     <Route path="/verify/:credentialId" element={<VerificationResult />} />
   </Routes></AppLayout>;

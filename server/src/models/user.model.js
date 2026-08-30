@@ -18,6 +18,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, trim: true, lowercase: true, maxlength: 254 },
   password: { type: String, required: true, select: false },
   role: { type: String, enum: Object.values(USER_ROLES), default: USER_ROLES.INSTITUTION, required: true },
+  publicKey: { type: String },
+  privateKey: { type: String, select: false },
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

@@ -10,9 +10,16 @@ import { findSessionUser, verifySessionToken } from '../services/auth.service.js
 import { apiError } from '../utils/api-error.js';
 
 const getToken = (req) => {
+  // Check parsed cookies (if cookie-parser middleware is active)
   if (req.cookies?.certivault_session) return req.cookies.certivault_session;
-  const [scheme, token] = String(req.headers.authorization || '').split(' ');
-  return scheme === 'Bearer' ? token : null;
+  // Raw cookie header may be lower- or upper-cased depending on the client
+  const raw = req.headers?.cookie || req.headers?.Cookie || '';
+  const match = raw.split(';').find((c) => c.trim().startsWith('certivault_session='));
+  if (match) return match.split('=')[1].trim();
+  // Fallback to Authorization header if present
+  const auth = String(req.headers?.authorization || '');
+  const [scheme, token] = auth.split(' ');
+  return scheme === 'Bearer' && token ? token.trim() : null;
 };
 
 export const requireAuth = async (req, res, next) => {

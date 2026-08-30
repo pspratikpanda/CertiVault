@@ -14,7 +14,7 @@ const sessionCookieOptions = (clear = false) => ({
   httpOnly: true,
   secure: config.nodeEnv === 'production',
   sameSite: 'lax',
-  path: '/api',
+  path: '/',
   ...(!clear && { maxAge: 12 * 60 * 60 * 1000 }),
 });
 
